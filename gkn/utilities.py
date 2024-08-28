@@ -14,6 +14,13 @@ from scipy.ndimage import gaussian_filter
 #################################################
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+def ball_connectivity(grid, r):
+    pwd = sklearn.metrics.pairwise_distances(grid)
+    edge_index = np.vstack(np.where(pwd <= r))
+    n_edges = edge_index.shape[1]
+    print(edge_index.shape)
+    return edge_index, n_edges
+
 class MatReader(object):
     def __init__(self, file_path, to_torch=True, to_cuda=False, to_float=True):
         super(MatReader, self).__init__()
