@@ -40,7 +40,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           cache: 'pip' # caching pip dependencies
-      - run: pip install h5py scipy ngsolve numpy torch torchvision pillow opencv-python pandas torch-lr-finder
+      - run: pip install h5py sklearn scipy ngsolve numpy torch torchvision pillow opencv-python pandas torch-lr-finder
 
       - name: Determine Previous Run Number
         id: get_prev_run
