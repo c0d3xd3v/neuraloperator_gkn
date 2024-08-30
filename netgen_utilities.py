@@ -20,4 +20,4 @@ def generate_unit_rectangle():
                      bc="rectangle",
                      leftdomain=1,
                      rightdomain=0)
-    return Mesh(geo.GenerateMesh(maxh=0.1))
+    return Mesh(geo.GenerateMesh(maxh=0.5))
