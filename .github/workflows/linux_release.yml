@@ -1,0 +1,70 @@
+# TODO : https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
+#
+name: Linux Release
+
+on:
+  push:
+    branches:
+      - 'main'
+#  schedule:
+#  - cron: "30 */6 * * *"
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  SOURCE_DIR:   ${{ github.workspace }}
+  ARTIFACT:     camcalib_artifacts.zip
+#  INSTALL_DIRECTORY: ${{ github.workspace }}/install
+
+jobs:
+  build:
+    runs-on:  ubuntu-22.04
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Get all tags for correct version determination
+        working-directory:  ${{ env.SOURCE_DIR }}
+        run: |
+          git fetch --all --tags -f    
+          
+      - name: Create build directory
+        run:  mkdir ${{ env.SOURCE_DIR }}/continouse_dataset
+
+      - name: setup-python
+        uses: actions/setup-python@v4
+        with:
+          cache: 'pip' # caching pip dependencies
+      - run: pip install ngsolve numpy torch torchvision pillow opencv-python pandas torch-lr-finder
+
+      - name: Determine Previous Run Number
+        id: get_prev_run
+        run: echo "::set-output name=prev_run::$((${{ github.run_number }} - 1))"
+
+      - name: Cache Build
+        uses: actions/cache@v3
+        with: 
+          path: ${{ env.SOURCE_DIR }}/data/
+          key: ubuntu-${{ github.run_number }}
+          restore-keys: ubuntu-${{ steps.get_prev_run.outputs.prev_run }}
+
+      - name: run python script
+        working-directory: ${{ env.SOURCE_DIR }}
+        run:  |
+              python poission_train_data_generate.py
+
+      - name: Zip build
+        working-directory: ${{ env.SOURCE_DIR }}
+        run:  |
+              7z a ${{ env.ARTIFACT }} ${{ env.SOURCE_DIR }}/current_model.pt
+
+      - name: Save build artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: ${{ env.ARTIFACT }}
+          path: ${{ env.SOURCE_DIR }}/${{ env.ARTIFACT }}
