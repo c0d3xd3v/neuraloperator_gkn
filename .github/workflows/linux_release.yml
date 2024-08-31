@@ -15,7 +15,7 @@ defaults:
 
 env:
   SOURCE_DIR:   ${{ github.workspace }}
-  ARTIFACT:     poission_weights.zip
+  ARTIFACT:     camcalib_artifacts.zip
 #  INSTALL_DIRECTORY: ${{ github.workspace }}/install
 
 jobs:
