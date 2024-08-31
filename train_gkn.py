@@ -33,7 +33,7 @@ class KernelNN(torch.nn.Module):
 
 if __name__== "__main__":
     time_restrict=True
-    max_time_in_hours = 0.1
+    max_time_in_hours = 5.5
     start = time.time()
 
     dataset_path = 'data/train_data.h5'
