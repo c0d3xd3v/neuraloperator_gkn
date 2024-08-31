@@ -15,7 +15,7 @@ defaults:
 
 env:
   SOURCE_DIR:   ${{ github.workspace }}
-  ARTIFACT:     camcalib_artifacts.zip
+  ARTIFACT:     poission_weights.zip
 #  INSTALL_DIRECTORY: ${{ github.workspace }}/install
 
 jobs:
@@ -60,13 +60,13 @@ jobs:
               #python poission_train_data_generate.py
               python train_gkn.py
 
-#      - name: Zip build
-#        working-directory: ${{ env.SOURCE_DIR }}
-#        run:  |
-#              7z a ${{ env.ARTIFACT }} ${{ env.SOURCE_DIR }}/current_model.pt
-#
-#      - name: Save build artifact
-#        uses: actions/upload-artifact@master
-#        with:
-#          name: ${{ env.ARTIFACT }}
-#          path: ${{ env.SOURCE_DIR }}/${{ env.ARTIFACT }}
+     - name: Zip build
+       working-directory: ${{ env.SOURCE_DIR }}
+       run:  |
+             7z a ${{ env.ARTIFACT }} ${{ env.SOURCE_DIR }}/data/current_model.pt
+
+     - name: Save build artifact
+       uses: actions/upload-artifact@master
+       with:
+         name: ${{ env.ARTIFACT }}
+         path: ${{ env.SOURCE_DIR }}/${{ env.ARTIFACT }}

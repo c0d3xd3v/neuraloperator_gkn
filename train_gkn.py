@@ -77,6 +77,7 @@ if __name__== "__main__":
             diff_h = diff/3600.
             print(f'remaining time : {diff_h}')
             if(diff_h >= max_time_in_hours and time_restrict==True):
+                torch.save(model.state_dict(), "data/current_model.pt")
                 sys.exit(0)
 
         print(train_mse/len(train_loader))
