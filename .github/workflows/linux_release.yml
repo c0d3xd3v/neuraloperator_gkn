@@ -56,8 +56,9 @@ jobs:
       - name: run python script
         working-directory: ${{ env.SOURCE_DIR }}
         run:  |
-              python hlp/hdf5.py
+              #python hlp/hdf5.py
               #python poission_train_data_generate.py
+              python train_gkn.py
 
 #      - name: Zip build
 #        working-directory: ${{ env.SOURCE_DIR }}

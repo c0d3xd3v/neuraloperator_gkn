@@ -44,9 +44,8 @@ optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=scheduler_step, gamma=scheduler_gamma)
 myloss = LpLoss(size_average=False)
 
-train_data = load_pde_dataset('train_data.h5')
+train_data = load_pde_dataset('data/train_data.h5')
 train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
-print("loaded ... ")
 
 
 model.train()
@@ -67,5 +66,5 @@ for epochn in range(epochs):
     scheduler.step()
     model.eval()
 
-torch.save(model.state_dict(), "current_model.pt")
+torch.save(model.state_dict(), "data/current_model.pt")
 
