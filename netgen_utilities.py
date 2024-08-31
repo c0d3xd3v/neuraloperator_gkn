@@ -13,11 +13,11 @@ def trianglesToEdgeList(mesh):
     return edges
 
 
-def generate_unit_rectangle():
+def generate_unit_rectangle(maxh=0.1):
     geo = SplineGeometry()
-    geo.AddRectangle(p1=(-1,-1),
-                     p2=(1,1),
+    geo.AddRectangle(p1=(-0.5,-0.5),
+                     p2=( 0.5, 0.5),
                      bc="rectangle",
                      leftdomain=1,
                      rightdomain=0)
-    return Mesh(geo.GenerateMesh(maxh=0.5))
+    return Mesh(geo.GenerateMesh(maxh=maxh))

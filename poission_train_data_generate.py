@@ -12,7 +12,7 @@ from torch_geometric.loader import DataLoader
 from torch_geometric.data import Data
 
 
-mesh = generate_unit_rectangle()
+mesh = generate_unit_rectangle(maxh=0.025)
 
 vertices = [[p[0], p[1], p[2]] for p in mesh.ngmesh.Points()]
 meshpoints = [mesh(v[0], v[1], v[2]) for v in vertices]
@@ -39,7 +39,7 @@ for i in range(10):
             y1 = 0.0
 
             source0 = CF(exp(-0.5*(((x - x0)/o0)**2 + ((y - y0)/(o0))**2)))
-            coeff0 = CF(1.) # CF(exp(-0.5*(((x - x1)/o1)**2 + ((y - y1)/(o1))**2)))
+            coeff0 = CF(1.)
             gfu = solvePoission(fes, gfu, g=source0, c=coeff0)
 
             coeffg = GridFunction(fes)
@@ -95,76 +95,16 @@ for i in range(10):
                              x=X, y=U, coeff=A)
             train_data.append(data_test)
 
-            #Draw(source0, mesh, "source")
-            #Draw(coeff0, mesh, "coeff0")
-            Draw(gfu, mesh, "gfu")
-
             print(f"{o0} : {len(train_data)} : {data_test}")
 
 
-import torch.nn.functional as F
-from gkn.utilities import *
-from gkn.nn_conv import NNConv_old, NNConv, NNConv_Gaussian
-
-class KernelNN(torch.nn.Module):
-    def __init__(self, width, ker_width, depth, ker_in, in_width=1, out_width=1):
-        super(KernelNN, self).__init__()
-        self.depth = depth
-
-        self.fc1 = torch.nn.Linear(in_width, width)
-
-        kernel = DenseNet([ker_in, ker_width, ker_width, width**2], torch.nn.ReLU)
-        self.conv1 = NNConv_old(width, width, kernel, aggr='mean')
-
-        self.fc2 = torch.nn.Linear(width, 1)
-
-    def forward(self, data):
-        x, edge_index, edge_attr = data.x, data.edge_index, data.edge_attr
-        x = self.fc1(x)
-        for k in range(self.depth - 1):
-            x = F.relu(self.conv1(x, edge_index, edge_attr))
-
-        x = self.fc2(x)
-        return x
-
-
-width = 128
-ker_width = 128
-depth = 6
-edge_features = 8
-node_features = 7
-batch_size = 8
-epochs = 100
-learning_rate = 0.005
-scheduler_step = 50
-scheduler_gamma = 0.5
-
-model = KernelNN(width, ker_width, depth, edge_features, in_width=node_features)
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=5e-4)
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=scheduler_step, gamma=scheduler_gamma)
-myloss = LpLoss(size_average=False)
-train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
-model.train()
-
-gfu_train = GridFunction(fes)
-
-for epochn in range(epochs):
-    train_mse = 0.0
-    for batch in train_loader:
-        optimizer.zero_grad()
-        out = model(batch)
-        out_np = out.view(-1, 1).detach().cpu().numpy()
-        #print(len(gfu.vec.data), len(out_np))
-        #v0 = [0] * len(gfu.vec)
-        for k in range(len(gfu.vec)):
-            gfu_train.vec.data[k] = out_np[k][0]
-        Draw(gfu_train, mesh, "gfu_train")
-        mse = F.mse_loss(out.view(-1, 1), batch.y.view(-1,1))
-        mse.backward()
-        optimizer.step()
-        train_mse += mse.item()
-    print(train_mse/len(train_loader))
-    scheduler.step()
-    model.eval()
-
-torch.save(model.state_dict(), "current_model.pt")
+import h5py
+with h5py.File('data/train_data.h5', 'w') as h5file:
+    for i, data in enumerate(train_data):
+        group = h5file.create_group(f'data_{i}')
+        group.create_dataset('x', data=data.x.numpy())
+        group.create_dataset('edge_index', data=data.edge_index.numpy())
+        group.create_dataset('edge_attr', data=data.edge_attr.numpy())
+        group.create_dataset('y', data=data.y.numpy())
+        group.create_dataset('coeff', data=data.coeff.numpy())
+print("Die Data-Objekte wurden erfolgreich in der HDF5-Datei gespeichert.")
