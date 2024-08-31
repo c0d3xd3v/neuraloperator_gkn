@@ -3,3 +3,5 @@
 .idea
 ngs.ini
 *.pt
+*.h5
+
