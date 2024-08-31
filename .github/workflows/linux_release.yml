@@ -58,15 +58,16 @@ jobs:
         run:  |
               #python hlp/hdf5.py
               #python poission_train_data_generate.py
-              python train_gkn.py
+              python train_gkn.pya
 
-     - name: Zip build
-       working-directory: ${{ env.SOURCE_DIR }}
-       run:  |
-             7z a ${{ env.ARTIFACT }} ${{ env.SOURCE_DIR }}/data/current_model.pt
+      - name: Zip build
+        working-directory: ${{ env.SOURCE_DIR }}
+        run:  |
+              7z a ${{ env.ARTIFACT }} ${{ env.SOURCE_DIR }}/data/current_model.pt
 
-     - name: Save build artifact
-       uses: actions/upload-artifact@master
-       with:
-         name: ${{ env.ARTIFACT }}
-         path: ${{ env.SOURCE_DIR }}/${{ env.ARTIFACT }}
+
+      - name: Save build artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: ${{ env.ARTIFACT }}
+          path: ${{ env.SOURCE_DIR }}/${{ env.ARTIFACT }}
