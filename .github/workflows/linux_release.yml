@@ -34,7 +34,7 @@ jobs:
           git fetch --all --tags -f    
           
       - name: Create build directory
-        run:  mkdir ${{ env.SOURCE_DIR }}/continouse_dataset
+        run:  mkdir ${{ env.SOURCE_DIR }}/data
 
       - name: setup-python
         uses: actions/setup-python@v4
