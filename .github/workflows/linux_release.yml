@@ -42,9 +42,9 @@ jobs:
           cache: 'pip' # caching pip dependencies
       - run: pip install h5py scikit-learn scipy ngsolve numpy torch torchvision pillow opencv-python pandas torch-lr-finder torch_geometric
 
-      - name: Determine Previous Run Number
-        id: get_prev_run
-        run: echo "::set-output name=prev_run::$((${{ github.run_number }} - 1))"
+#      - name: Determine Previous Run Number
+#        id: get_prev_run
+#        run: echo "::set-output name=prev_run::$((${{ github.run_number }} - 1))"
 
       - name: Cache Build
         uses: actions/cache@v3
@@ -58,13 +58,13 @@ jobs:
         run:  |
               python poission_train_data_generate.py
 
-      - name: Zip build
-        working-directory: ${{ env.SOURCE_DIR }}
-        run:  |
-              7z a ${{ env.ARTIFACT }} ${{ env.SOURCE_DIR }}/current_model.pt
-
-      - name: Save build artifact
-        uses: actions/upload-artifact@master
-        with:
-          name: ${{ env.ARTIFACT }}
-          path: ${{ env.SOURCE_DIR }}/${{ env.ARTIFACT }}
+#      - name: Zip build
+#        working-directory: ${{ env.SOURCE_DIR }}
+#        run:  |
+#              7z a ${{ env.ARTIFACT }} ${{ env.SOURCE_DIR }}/current_model.pt
+#
+#      - name: Save build artifact
+#        uses: actions/upload-artifact@master
+#        with:
+#          name: ${{ env.ARTIFACT }}
+#          path: ${{ env.SOURCE_DIR }}/${{ env.ARTIFACT }}
