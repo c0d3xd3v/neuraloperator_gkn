@@ -33,5 +33,5 @@ def load_pde_dataset(pde_file_name):
 if __name__=="__main__":
 
     batch_size = 8
-    train_data = load_pde_dataset('train_data.h5')
+    train_data = load_pde_dataset('data/train_data.h5')
     train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
