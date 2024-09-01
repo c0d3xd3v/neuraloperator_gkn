@@ -30,12 +30,12 @@ if __name__== "__main__":
     model = KernelNN(width, ker_width, depth, edge_features, in_width=node_features)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=5e-4)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=scheduler_step, gamma=scheduler_gamma)
-    myloss = LpLoss(size_average=False)
+    #myloss = LpLoss(size_average=False)
     train_data = load_pde_dataset(dataset_path)
 
 
     time_restrict=True
-    max_time_in_hours = 5.75
+    max_time_in_hours = 0.05
     start = time.time()
     epochs = 100
     train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
@@ -70,6 +70,8 @@ if __name__== "__main__":
                     optimizer,
                     epochn,
                     learning_rate,
+                    scheduler_step,
+                    scheduler_gamma,
                     checkpoint_path)
                 sys.exit(0)
 
@@ -88,4 +90,6 @@ save_check_point(
                 optimizer,
                 epochn,
                 learning_rate,
+                scheduler_step,
+                scheduler_gamma,
                 checkpoint_path)
