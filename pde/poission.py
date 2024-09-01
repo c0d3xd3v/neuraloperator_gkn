@@ -1,3 +1,4 @@
+import ngsolve
 from ngsolve import *
 
 def solvePoission(fes, gfu, g=CF(1.), c=CF(1.)):

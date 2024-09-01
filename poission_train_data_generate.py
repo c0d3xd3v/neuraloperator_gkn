@@ -1,29 +1,31 @@
-from ngsolve import *
-
 import torch
+import ngsolve
 import numpy as np
-
-from netgen_utilities import generate_unit_rectangle
-
-from pde.poission import solvePoission
-from gkn.utilities import ball_connectivity, GaussianNormalizer
+from ngsolve import *
 
 from torch_geometric.loader import DataLoader
 from torch_geometric.data import Data
 
+from pde.poission import solvePoission
+from gkn.utilities import ball_connectivity, GaussianNormalizer
+from netgen_utilities import generate_unit_rectangle
+from hlp.hdf5 import write_pde_dataset_to_hdf5
 
-mesh = generate_unit_rectangle(maxh=0.025)
+
+filename = 'data/train_data.h5'
+unit_rect_sampling = 0.2
+r = 0.5
+fes_order = 1
+
+mesh = generate_unit_rectangle(maxh=unit_rect_sampling)
 
 vertices = [[p[0], p[1], p[2]] for p in mesh.ngmesh.Points()]
 meshpoints = [mesh(v[0], v[1], v[2]) for v in vertices]
 vertices = np.transpose(np.array(vertices))
-r = 0.05
 edge_index, _ = ball_connectivity(vertices.T, r)
 
-fes_order = 1
 fes = H1(mesh, order=fes_order, dirichlet="rectangle", complex=False)
 gfu = GridFunction(fes)
-gfut = GridFunction(gfu.space,multidim=0)
 
 train_data = []
 
@@ -38,7 +40,7 @@ for i in range(10):
             x1 = 0.0
             y1 = 0.0
 
-            source0 = CF(exp(-0.5*(((x - x0)/o0)**2 + ((y - y0)/(o0))**2)))
+            source0 = CF(ngsolve.exp(-0.5*(((x - x0)/o0)**2 + ((y - y0)/(o0))**2)))
             coeff0 = CF(1.)
             gfu = solvePoission(fes, gfu, g=source0, c=coeff0)
 
@@ -98,13 +100,4 @@ for i in range(10):
             print(f"{o0} : {len(train_data)} : {data_test}")
 
 
-import h5py
-with h5py.File('data/train_data.h5', 'w') as h5file:
-    for i, data in enumerate(train_data):
-        group = h5file.create_group(f'data_{i}')
-        group.create_dataset('x', data=data.x.numpy())
-        group.create_dataset('edge_index', data=data.edge_index.numpy())
-        group.create_dataset('edge_attr', data=data.edge_attr.numpy())
-        group.create_dataset('y', data=data.y.numpy())
-        group.create_dataset('coeff', data=data.coeff.numpy())
-print("Die Data-Objekte wurden erfolgreich in der HDF5-Datei gespeichert.")
+write_pde_dataset_to_hdf5(filename, train_data)
