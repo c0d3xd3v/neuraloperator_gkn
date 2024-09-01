@@ -16,8 +16,6 @@ if __name__== "__main__":
     dataset_path = 'data/train_data.h5'
     checkpoint_path = 'data/checkpoint.pt'
 
-    load_check_point(checkpoint_path)
-
     width = 32
     ker_width = 32
     depth = 6
