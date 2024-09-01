@@ -35,9 +35,9 @@ if __name__== "__main__":
 
 
     time_restrict=True
-    max_time_in_hours = 0.05
+    max_time_in_hours = 5.75
     start = time.time()
-    epochs = 100
+    epochs = 1000
     train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
 
     model.train()
