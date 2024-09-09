@@ -63,7 +63,7 @@ jobs:
       - name: Zip build
         working-directory: ${{ env.SOURCE_DIR }}
         run:  |
-              7z a ${{ env.ARTIFACT }} ${{ env.SOURCE_DIR }}/data/checkpoint.pt ${{ env.SOURCE_DIR }}/data/train_data2.h5 ${{ env.SOURCE_DIR }}/data/train_mesh.vol
+              7z a ${{ env.ARTIFACT }}  ${{ env.SOURCE_DIR }}/data/train_data2.h5 ${{ env.SOURCE_DIR }}/data/train_mesh.vol # ${{ env.SOURCE_DIR }}/data/checkpoint.pt
 
 
       - name: Save build artifact
