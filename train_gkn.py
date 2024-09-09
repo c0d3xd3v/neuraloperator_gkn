@@ -1,6 +1,7 @@
 import sys
 import time
 import torch
+from ngsolve import *
 import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
 
@@ -15,7 +16,8 @@ if __name__== "__main__":
 
     dataset_path = 'data/train_data.h5'
     checkpoint_path = 'data/checkpoint.pt'
-
+    train_mesh_path = "data/train_mesh.vol"
+    
     width = 32
     ker_width = 32
     depth = 6
@@ -23,10 +25,16 @@ if __name__== "__main__":
     node_features = 7
     batch_size = 2
 
-    learning_rate = 0.005
+    learning_rate = 0.00005
     scheduler_step = 50
     scheduler_gamma = 0.5
 
+    mesh = Mesh(train_mesh_path)
+    
+    fes_order = 1
+    fes = H1(mesh, order=fes_order, dirichlet="rectangle", complex=False)
+    gfu = GridFunction(fes)
+    
     model = KernelNN(width, ker_width, depth, edge_features, in_width=node_features)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=5e-4)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=scheduler_step, gamma=scheduler_gamma)
@@ -35,7 +43,7 @@ if __name__== "__main__":
 
 
     time_restrict=True
-    max_time_in_hours = 5.75
+    max_time_in_hours = 0.05
     start = time.time()
     epochs = 1000
     train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
@@ -45,9 +53,14 @@ if __name__== "__main__":
     for epochn in range(epochs):
         train_mse = 0.0
         for batch in train_loader:
+            print(batch)
             optimizer.zero_grad()
             out = model(batch)
             out_np = out.view(-1, 1).detach().cpu().numpy()
+
+            for k in range(len(gfu.vec)):
+                gfu.vec.data[k] = out_np[k][0]
+            Draw(gfu, mesh, "gfu_train")
 
             mse = F.mse_loss(out.view(-1, 1), batch.y.view(-1,1))
             mse.backward()
@@ -75,10 +88,9 @@ if __name__== "__main__":
                     checkpoint_path)
                 sys.exit(0)
 
-        print(f'epoch : {epochn}, mse : {train_mse/len(train_loader)}')
+        #print(f'epoch : {epochn}, mse : {train_mse/len(train_loader)}')
         scheduler.step()
         model.eval()
-
 
 save_check_point(
                 model,

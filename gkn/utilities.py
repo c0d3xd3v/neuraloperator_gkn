@@ -18,7 +18,6 @@ def ball_connectivity(grid, r):
     pwd = sklearn.metrics.pairwise_distances(grid)
     edge_index = np.vstack(np.where(pwd <= r))
     n_edges = edge_index.shape[1]
-    print(edge_index.shape)
     return edge_index, n_edges
 
 class MatReader(object):

@@ -1,23 +1,26 @@
 import torch
 import ngsolve
 import numpy as np
-from ngsolve import *
+import math
+from ngsolve import H1, GridFunction, CF, x, y, grad, Draw
 
 from torch_geometric.loader import DataLoader
 from torch_geometric.data import Data
 
 from pde.poission import solvePoission
 from gkn.utilities import ball_connectivity, GaussianNormalizer
-from netgen_utilities import generate_unit_rectangle
+from hlp.netgen_utilities import generate_unit_rectangle
 from hlp.hdf5 import write_pde_dataset_to_hdf5
 
 
-filename = 'data/train_data.h5'
-unit_rect_sampling = 0.2
-r = 0.5
+# output file name
+filename = 'data/train_data2.h5'
+unit_rect_sampling = 0.0175
+r = 1.0*unit_rect_sampling
 fes_order = 1
 
 mesh = generate_unit_rectangle(maxh=unit_rect_sampling)
+mesh.ngmesh.Save("data/train_mesh.vol")
 
 vertices = [[p[0], p[1], p[2]] for p in mesh.ngmesh.Points()]
 meshpoints = [mesh(v[0], v[1], v[2]) for v in vertices]
@@ -29,12 +32,12 @@ gfu = GridFunction(fes)
 
 train_data = []
 
-for i in range(10):
-    for j in range(10):
-        for k in range(10):
-            o0 = k/10. + 0.05
-            x0 = cos(i / 10. * pi * 2)
-            y0 = sin(j / 10. * pi * 2)
+for i in range(1,10):
+    for j in range(1,10):
+        for k in range(1,10):
+            o0 = (k/9.)
+            x0 = math.cos((i / 10.) * math.pi * 2)
+            y0 = math.sin((j / 10.) * math.pi * 2)
 
             o1 = 1.0
             x1 = 0.0
@@ -43,6 +46,8 @@ for i in range(10):
             source0 = CF(ngsolve.exp(-0.5*(((x - x0)/o0)**2 + ((y - y0)/(o0))**2)))
             coeff0 = CF(1.)
             gfu = solvePoission(fes, gfu, g=source0, c=coeff0)
+
+            Draw(gfu)
 
             coeffg = GridFunction(fes)
             coeffg.Set(coeff0)
@@ -97,7 +102,7 @@ for i in range(10):
                              x=X, y=U, coeff=A)
             train_data.append(data_test)
 
-            print(f"{o0} : {len(train_data)} : {data_test}")
+            print(f"{i} : {j} : {k} \n {data_test}")
 
 
 write_pde_dataset_to_hdf5(filename, train_data)
