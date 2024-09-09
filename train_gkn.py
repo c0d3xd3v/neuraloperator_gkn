@@ -16,7 +16,7 @@ if __name__== "__main__":
 
     dataset_path = 'data/train_data2.h5'
     checkpoint_path = 'data/checkpoint.pt'
-    train_mesh_path = "data/train_mesh2.vol"
+    train_mesh_path = "data/train_mesh.vol"
     
     width = 32
     ker_width = 32
