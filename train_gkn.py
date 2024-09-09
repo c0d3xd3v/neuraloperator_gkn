@@ -14,18 +14,18 @@ from hlp.nn import load_check_point
 
 if __name__== "__main__":
 
-    dataset_path = 'data/train_data.h5'
+    dataset_path = 'data/train_data2.h5'
     checkpoint_path = 'data/checkpoint.pt'
-    train_mesh_path = "data/train_mesh.vol"
+    train_mesh_path = "data/train_mesh2.vol"
     
     width = 32
     ker_width = 32
     depth = 6
     edge_features = 8
     node_features = 7
-    batch_size = 2
+    batch_size = 8
 
-    learning_rate = 0.00005
+    learning_rate = 0.005
     scheduler_step = 50
     scheduler_gamma = 0.5
 
@@ -43,9 +43,9 @@ if __name__== "__main__":
 
 
     time_restrict=True
-    max_time_in_hours = 0.05
+    max_time_in_hours = 5.75
     start = time.time()
-    epochs = 1000
+    epochs = 100000
     train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
 
     model.train()
@@ -53,7 +53,6 @@ if __name__== "__main__":
     for epochn in range(epochs):
         train_mse = 0.0
         for batch in train_loader:
-            print(batch)
             optimizer.zero_grad()
             out = model(batch)
             out_np = out.view(-1, 1).detach().cpu().numpy()
@@ -88,7 +87,7 @@ if __name__== "__main__":
                     checkpoint_path)
                 sys.exit(0)
 
-        #print(f'epoch : {epochn}, mse : {train_mse/len(train_loader)}')
+        print(f'epoch : {epochn}, mse : {train_mse/len(train_loader)}')
         scheduler.step()
         model.eval()
 
