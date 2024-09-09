@@ -58,6 +58,7 @@ jobs:
         run:  |
               #python hlp/hdf5.py
               #python poission_train_data_generate.py
+              ls ${{ env.SOURCE_DIR }}/data/
               python train_gkn.py
 
       - name: Zip build
