@@ -18,14 +18,14 @@ if __name__== "__main__":
     checkpoint_path = 'data/checkpoint.pt'
     train_mesh_path = "data/train_mesh.vol"
     
-    width = 16
-    ker_width = 16
+    width = 64
+    ker_width = 64
     depth = 2
     edge_features = 8
     node_features = 7
     batch_size = 8
 
-    learning_rate = 0.005
+    learning_rate = 0.00005
     scheduler_step = 50
     scheduler_gamma = 0.5
 

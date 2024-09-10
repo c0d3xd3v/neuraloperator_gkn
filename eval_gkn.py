@@ -78,8 +78,8 @@ def sample_from_ngsolve_mesh(mesh, source0, coeff0,  r = 0.2):
 
 if __name__ == "__main__":
 
-    dataset_path = 'data/train_data.h5'
-    checkpoint_path = 'data/checkpoint.pt'
+    dataset_path = 'data/model2/train_data2.h5'
+    checkpoint_path = 'data/model2/checkpoint.pt'
     unit_rect_sampling = 0.04
     r = 1.5*unit_rect_sampling
     fes_order = 1
@@ -91,21 +91,17 @@ if __name__ == "__main__":
     #geo = OCCGeometry(air, dim=2)
     #mesh = Mesh(geo.GenerateMesh(maxh=0.05))
 
-    mesh.ngmesh.Save("data/test_mesh.vol")
+    mesh.ngmesh.Save("data/model1/test_mesh.vol")
     fes = H1(mesh, order=fes_order, dirichlet="rectangle", complex=False)
 
     k = 10
-    i = 2
-    j = 1
+    j = 5
+    i = 5
     o0 = k / 10.0 + 0.05
     x0 = math.cos(i / 10. * math.pi * 2)
     y0 = math.sin(j / 10. * math.pi * 2)
 
-    o1 = 1.0
-    x1 = 0.0
-    y1 = 0.0
-
-    source0 = CF(exp(-0.5 * (((x - x0) / o0) ** 2 + ((y - y0) / (o0)) ** 2)))
+    source0 = CF(exp(-0.5 * (((x - x0) / o0) ** 2 + ((y - y0) / o0) ** 2)))
     coeff0 = CF(1.)
     data_test = sample_from_ngsolve_mesh(mesh, source0, coeff0, r=r)
 
