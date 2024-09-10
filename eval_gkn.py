@@ -78,8 +78,8 @@ def sample_from_ngsolve_mesh(mesh, source0, coeff0,  r = 0.2):
 
 if __name__ == "__main__":
 
-    dataset_path = 'data/model2/train_data2.h5'
-    checkpoint_path = 'data/model2/checkpoint.pt'
+    dataset_path = 'data/model1/train_data2.h5'
+    checkpoint_path = 'data/model1/checkpoint.pt'
     unit_rect_sampling = 0.04
     r = 1.5*unit_rect_sampling
     fes_order = 1
@@ -101,7 +101,7 @@ if __name__ == "__main__":
     x0 = math.cos(i / 10. * math.pi * 2)
     y0 = math.sin(j / 10. * math.pi * 2)
 
-    source0 = CF(exp(-0.5 * (((x - x0) / o0) ** 2 + ((y - y0) / o0) ** 2)))
+    source0 = CF(-1.0) # CF(exp(-0.5 * (((x - x0) / o0) ** 2 + ((y - y0) / o0) ** 2)))
     coeff0 = CF(1.)
     data_test = sample_from_ngsolve_mesh(mesh, source0, coeff0, r=r)
 
@@ -113,6 +113,9 @@ if __name__ == "__main__":
     out_np = out.view(-1, 1).detach().cpu().numpy()
 
     gfu = GridFunction(fes)
+    gfsource = GridFunction(fes)
+    gfsource.Set(source0)
     for k in range(len(gfu.vec)):
         gfu.vec.data[k] = out_np[k][0]
     Draw(gfu, mesh, "gfu_train")
+    Draw(gfsource, mesh, "gfsource")
