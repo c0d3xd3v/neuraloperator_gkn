@@ -3,13 +3,15 @@ import torch
 import numpy as np
 
 from torch_geometric.loader import DataLoader
-from ngsolve import H1, GridFunction, CF, x, y, grad, exp, Mesh
+from ngsolve import H1, GridFunction, CF, x, y, grad, exp, Mesh, sin
 from netgen.occ import *
 from torch_geometric.data import Data
 
 from hlp.nn import load_check_point
 from hlp.netgen_utilities import generate_unit_rectangle
 from gkn.utilities import ball_connectivity, GaussianNormalizer
+
+from netgen.geom2d import SplineGeometry
 
 def sample_from_ngsolve_mesh(mesh, source0, coeff0,  r = 0.2):
 
@@ -80,16 +82,19 @@ if __name__ == "__main__":
 
     dataset_path = 'data/model1/train_data2.h5'
     checkpoint_path = 'data/model1/checkpoint.pt'
-    unit_rect_sampling = 0.04
+    unit_rect_sampling = 0.005
     r = 1.5*unit_rect_sampling
     fes_order = 1
 
-    mesh = generate_unit_rectangle(maxh=unit_rect_sampling)
+    #mesh = generate_unit_rectangle(maxh=unit_rect_sampling)
 
-    #air = Circle((0.0, 0.0), 1.0).Face()
-    #air.edges.name = 'rectangle'
-    #geo = OCCGeometry(air, dim=2)
-    #mesh = Mesh(geo.GenerateMesh(maxh=0.05))
+    air = Circle((0.0, 0.0), 1.0).Face()
+    air.edges.name = 'outer'
+    s = 2
+    scatterer = MoveTo(-s*0.5, -s*0.5).Rectangle(s, s).Face()
+    scatterer.edges.name = 'scat'
+    geo = OCCGeometry(scatterer, dim=2)
+    mesh = Mesh(geo.GenerateMesh(maxh=0.1))
 
     mesh.ngmesh.Save("data/model1/test_mesh.vol")
     fes = H1(mesh, order=fes_order, dirichlet="rectangle", complex=False)
@@ -101,7 +106,7 @@ if __name__ == "__main__":
     x0 = math.cos(i / 10. * math.pi * 2)
     y0 = math.sin(j / 10. * math.pi * 2)
 
-    source0 = CF(-1.0) # CF(exp(-0.5 * (((x - x0) / o0) ** 2 + ((y - y0) / o0) ** 2)))
+    source0 = CF(1.) # CF(exp(-0.5 * (((x - x0) / o0) ** 2 + ((y - y0) / o0) ** 2)))
     coeff0 = CF(1.)
     data_test = sample_from_ngsolve_mesh(mesh, source0, coeff0, r=r)
 
@@ -117,5 +122,6 @@ if __name__ == "__main__":
     gfsource.Set(source0)
     for k in range(len(gfu.vec)):
         gfu.vec.data[k] = out_np[k][0]
-    Draw(gfu, mesh, "gfu_train")
+
     Draw(gfsource, mesh, "gfsource")
+    Draw(gfu, mesh, "gfu_train")
