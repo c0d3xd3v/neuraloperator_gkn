@@ -14,7 +14,7 @@ from hlp.hdf5 import write_pde_dataset_to_hdf5
 
 
 # output file name
-filename = 'data/train_data2.h5'
+filename = 'data/train_data.h5'
 unit_rect_sampling = 0.0175
 r = 1.0*unit_rect_sampling
 fes_order = 1
