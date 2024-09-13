@@ -14,30 +14,17 @@ from hlp.nn import load_check_point
 
 if __name__== "__main__":
 
-    dataset_path = 'data/train_data.h5'
-    checkpoint_path = 'data/checkpoint.pt'
-    train_mesh_path = "data/train_mesh.vol"
-    
-    width = 64
-    ker_width = 64
-    depth = 2
-    edge_features = 8
-    node_features = 7
-    batch_size = 8
-
-    learning_rate = 0.00005
-    scheduler_step = 50
-    scheduler_gamma = 0.5
+    dataset_path = 'data/model2/train_data2.h5'
+    checkpoint_path = 'data/model2/checkpoint.pt'
+    train_mesh_path = "data/model2/train_mesh.vol"
 
     mesh = Mesh(train_mesh_path)
     
     fes_order = 1
     fes = H1(mesh, order=fes_order, dirichlet="rectangle", complex=False)
     gfu = GridFunction(fes)
-    
-    model = KernelNN(width, ker_width, depth, edge_features, in_width=node_features)
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=5e-4)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=scheduler_step, gamma=scheduler_gamma)
+
+    model, optimizer, scheduler, epoch = load_check_point(checkpoint_path)
     #myloss = LpLoss(size_average=False)
     train_data = load_pde_dataset(dataset_path)
 
@@ -46,6 +33,7 @@ if __name__== "__main__":
     max_time_in_hours = 5.75
     start = time.time()
     epochs = 100000
+    batch_size = 8
     train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
 
     model.train()
@@ -92,15 +80,15 @@ if __name__== "__main__":
         model.eval()
 
 save_check_point(
-                model,
-                width,
-                ker_width,
-                depth,
-                edge_features,
-                node_features,
-                optimizer,
-                epochn,
-                learning_rate,
-                scheduler_step,
-                scheduler_gamma,
-                checkpoint_path)
+    model,
+    width,
+    ker_width,
+    depth,
+    edge_features,
+    node_features,
+    optimizer,
+    epochn,
+    learning_rate,
+    scheduler_step,
+    scheduler_gamma,
+    checkpoint_path)

@@ -25,6 +25,7 @@ def save_check_point(model, width, ker_width, depth, edge_features, node_feature
 
 def load_check_point(checkpoint_fpath):
     epoch = 0
+    has_statedict = False
     if os.path.isfile(checkpoint_fpath):
 
         checkpoint = torch.load(checkpoint_fpath, weights_only=True)
@@ -37,14 +38,27 @@ def load_check_point(checkpoint_fpath):
         learning_rate = checkpoint['learning_rate']
         scheduler_step = checkpoint['scheduler_step']
         scheduler_gamma = checkpoint['scheduler_gamma']
+        epoch = checkpoint['epoch'] if 'epoch' in checkpoint.keys() else -1
+        has_statedict = True
+        print(f'load from file : {checkpoint_fpath}')
+    else:
+        width = 64
+        ker_width = 64
+        depth = 2
+        edge_features = 8
+        node_features = 7
 
-        model = KernelNN(width, ker_width, depth, edge_features, in_width=node_features)
-        optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=5e-4)
-        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=scheduler_step, gamma=scheduler_gamma)
+        learning_rate = 0.00005
+        scheduler_step = 50
+        scheduler_gamma = 0.5
 
+    model = KernelNN(width, ker_width, depth, edge_features, in_width=node_features)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=5e-4)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=scheduler_step, gamma=scheduler_gamma)
+
+    if has_statedict:
         model.load_state_dict(checkpoint['state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer'])
-        epoch = checkpoint['epoch'] if 'epoch' in checkpoint.keys() else -1
 
     return model, optimizer, scheduler, epoch
 
