@@ -14,9 +14,9 @@ from hlp.nn import load_check_point
 
 if __name__== "__main__":
 
-    dataset_path = 'data/model2/train_data2.h5'
-    checkpoint_path = 'data/model2/checkpoint.pt'
-    train_mesh_path = "data/model2/train_mesh.vol"
+    dataset_path = 'data/train_data2.h5'
+    checkpoint_path = 'data/checkpoint.pt'
+    train_mesh_path = "data/train_mesh.vol"
 
     mesh = Mesh(train_mesh_path)
     
@@ -24,7 +24,7 @@ if __name__== "__main__":
     fes = H1(mesh, order=fes_order, dirichlet="rectangle", complex=False)
     gfu = GridFunction(fes)
 
-    model, optimizer, scheduler, epoch = load_check_point(checkpoint_path)
+    model, optimizer, scheduler, epoch, learning_rate, scheduler_step, scheduler_gamma = load_check_point(checkpoint_path)
     #myloss = LpLoss(size_average=False)
     train_data = load_pde_dataset(dataset_path)
 
@@ -62,11 +62,11 @@ if __name__== "__main__":
                 model.eval()
                 save_check_point(
                     model,
-                    width,
-                    ker_width,
-                    depth,
-                    edge_features,
-                    node_features,
+                    model.width,
+                    model.ker_width,
+                    model.depth,
+                    model.edge_features,
+                    model.node_features,
                     optimizer,
                     epochn,
                     learning_rate,
@@ -81,11 +81,11 @@ if __name__== "__main__":
 
 save_check_point(
     model,
-    width,
-    ker_width,
-    depth,
-    edge_features,
-    node_features,
+    model.width,
+    model.ker_width,
+    model.depth,
+    model.edge_features,
+    model.node_features,
     optimizer,
     epochn,
     learning_rate,

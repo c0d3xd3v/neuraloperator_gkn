@@ -9,9 +9,11 @@ class KernelNN(torch.nn.Module):
     def __init__(self, width, ker_width, depth, ker_in, in_width=1, out_width=1):
         super(KernelNN, self).__init__()
         self.depth = depth
-
+        self.width = width
+        self.ker_width = ker_width
+        self.edge_features = ker_in
+        self.node_features = in_width
         self.fc1 = torch.nn.Linear(in_width, width)
-
         kernel = DenseNet([ker_in, ker_width, ker_width, width**2], torch.nn.ReLU)
         self.conv1 = NNConv_old(width, width, kernel, aggr='mean')
 

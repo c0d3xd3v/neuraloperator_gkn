@@ -60,5 +60,5 @@ def load_check_point(checkpoint_fpath):
         model.load_state_dict(checkpoint['state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer'])
 
-    return model, optimizer, scheduler, epoch
+    return model, optimizer, scheduler, epoch, learning_rate, scheduler_step, scheduler_gamma
 
