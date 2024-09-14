@@ -14,7 +14,7 @@ from hlp.nn import load_check_point
 
 if __name__== "__main__":
 
-    dataset_path = 'data/train_data2.h5'
+    dataset_path = 'data/train_data.h5'
     checkpoint_path = 'data/checkpoint.pt'
     train_mesh_path = "data/train_mesh.vol"
 
