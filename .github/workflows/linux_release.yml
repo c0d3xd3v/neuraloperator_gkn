@@ -50,7 +50,7 @@ jobs:
         uses: actions/cache@v3
         with: 
           path: ${{ env.SOURCE_DIR }}/data/
-          key: train_data
+          key: train_data_model
           restore-keys: train_data
 
       - name: run python script
