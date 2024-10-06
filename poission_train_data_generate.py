@@ -58,7 +58,7 @@ for i in range(1,10):
             coeffx = coeffg[0]
             coeffy = coeffg[1]
 
-            data_test = cconstruct_poission_dirichlet_datareate_poission_dirichlet_data(meshpoints, vertices, gfu, coeff0, coeffx, coeffy, source0)
+            data_test = construct_poission_dirichlet_data(meshpoints, vertices, edge_index, gfu, coeff0, coeffx, coeffy, source0)
             train_data.append(data_test)
             print(f"{i} : {j} : {k} \n {data_test}")
 

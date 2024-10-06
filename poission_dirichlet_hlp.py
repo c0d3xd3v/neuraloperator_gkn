@@ -3,7 +3,7 @@ import torch
 from gkn.utilities import ball_connectivity, GaussianNormalizer
 
 
-def construct_poission_dirichlet_data(meshpoints, vertices, gfu, coeff0, coeffx, coeffy, source0):
+def construct_poission_dirichlet_data(meshpoints, vertices, edge_index, gfu, coeff0, coeffx, coeffy, source0):
     U = torch.Tensor([gfu(x) for x in meshpoints])
     A = torch.Tensor([coeff0(x) for x in meshpoints])
     Ax = torch.Tensor([coeffx(x) for x in meshpoints])
