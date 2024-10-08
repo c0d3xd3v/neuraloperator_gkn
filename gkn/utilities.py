@@ -119,6 +119,7 @@ class GaussianNormalizer(object):
         self.mean = torch.mean(x)
         self.std = torch.std(x)
         self.eps = eps
+        print(f'std : {self.std} \nmean : {self.mean}')
 
     def encode(self, x):
         x = (x - self.mean) / (self.std + self.eps)

@@ -1,4 +1,5 @@
 from ngsolve import *
+from netgen.occ import *
 from netgen.geom2d import SplineGeometry
 
 
@@ -21,3 +22,13 @@ def generate_unit_rectangle(maxh=0.1):
                      leftdomain=1,
                      rightdomain=0)
     return Mesh(geo.GenerateMesh(maxh=maxh))
+
+
+def generate_unit_rectangle_with_hole(maxh=0.1):
+    air = Circle((0.5, 0.5), 0.8).Face()
+    air.edges.name = 'rectangle'
+    scatterer = MoveTo(0.7, 0.3).Rectangle(0.05, 0.4).Face()
+    scatterer.edges.name = 'rectangle'
+    geo = OCCGeometry(air - scatterer, dim=2)
+    mesh = Mesh(geo.GenerateMesh(maxh=0.05))
+    return mesh

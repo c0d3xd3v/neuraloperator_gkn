@@ -3,7 +3,7 @@ import torch
 import numpy as np
 
 from torch_geometric.loader import DataLoader
-from ngsolve import H1, GridFunction, CF, x, y, grad, exp, Mesh, sin
+from ngsolve import H1, GridFunction, CF, x, y, grad, exp, Mesh, sin, Draw
 from netgen.occ import *
 from torch_geometric.data import Data
 
@@ -78,50 +78,47 @@ def sample_from_ngsolve_mesh(mesh, source0, coeff0,  r = 0.2):
     return data_test
 
 
-if __name__ == "__main__":
+#if __name__ == "__main__":
 
-    dataset_path = 'data/model1/train_data2.h5'
-    checkpoint_path = 'data/model1/checkpoint.pt'
-    unit_rect_sampling = 0.005
-    r = 1.5*unit_rect_sampling
-    fes_order = 1
+dataset_path = 'data/train_data2.h5'
+checkpoint_path = 'data/checkpoint.pt'
+unit_rect_sampling = 0.1
+r = 0.05*unit_rect_sampling
+fes_order = 1
 
-    #mesh = generate_unit_rectangle(maxh=unit_rect_sampling)
 
-    air = Circle((0.0, 0.0), 1.0).Face()
-    air.edges.name = 'outer'
-    s = 2
-    scatterer = MoveTo(-s*0.5, -s*0.5).Rectangle(s, s).Face()
-    scatterer.edges.name = 'scat'
-    geo = OCCGeometry(scatterer, dim=2)
-    mesh = Mesh(geo.GenerateMesh(maxh=0.1))
+s = 1.0
+scatterer = MoveTo(-s*0.5, -s*0.5).Rectangle(s, s).Face()
+scatterer.edges.name = 'scat'
+geo = OCCGeometry(scatterer, dim=2)
+mesh = Mesh(geo.GenerateMesh(maxh=0.25*unit_rect_sampling))
 
-    mesh.ngmesh.Save("data/model1/test_mesh.vol")
-    fes = H1(mesh, order=fes_order, dirichlet="rectangle", complex=False)
+#mesh.ngmesh.Save("data/model1/test_mesh.vol")
+fes = H1(mesh, order=fes_order, dirichlet="rectangle", complex=False)
 
-    k = 10
-    j = 5
-    i = 5
-    o0 = k / 10.0 + 0.05
-    x0 = math.cos(i / 10. * math.pi * 2)
-    y0 = math.sin(j / 10. * math.pi * 2)
+k = 10
+j = 5
+i = 5
+o0 = k / 10.0 + 0.05
+x0 = math.cos(i / 10. * math.pi * 2)
+y0 = math.sin(j / 10. * math.pi * 2)
 
-    source0 = CF(1.) # CF(exp(-0.5 * (((x - x0) / o0) ** 2 + ((y - y0) / o0) ** 2)))
-    coeff0 = CF(1.)
-    data_test = sample_from_ngsolve_mesh(mesh, source0, coeff0, r=r)
+source0 = CF(1.) # CF(exp(-0.5 * (((x - x0) / o0) ** 2 + ((y - y0) / o0) ** 2)))
+coeff0 = CF(1.)
+data_test = sample_from_ngsolve_mesh(mesh, source0, coeff0, r=r)
 
-    print(data_test)
+print(data_test)
 
-    model, _, _, _ = load_check_point(checkpoint_path)
-    out = model(data_test)
-    print(out.data)
-    out_np = out.view(-1, 1).detach().cpu().numpy()
+model, _, _, _ , _, _, _ = load_check_point(checkpoint_path)
+out = model(data_test)
+print(out.data)
+out_np = out.view(-1, 1).detach().cpu().numpy()
 
-    gfu = GridFunction(fes)
-    gfsource = GridFunction(fes)
-    gfsource.Set(source0)
-    for k in range(len(gfu.vec)):
-        gfu.vec.data[k] = out_np[k][0]
+gfu = GridFunction(fes)
+gfsource = GridFunction(fes)
+gfsource.Set(source0)
+for k in range(len(gfu.vec)):
+    gfu.vec.data[k] = out_np[k][0]
 
-    Draw(gfsource, mesh, "gfsource")
-    Draw(gfu, mesh, "gfu_train")
+Draw(gfsource, mesh, "gfsource")
+Draw(gfu, mesh, "gfu_train")
