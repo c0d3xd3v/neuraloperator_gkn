@@ -81,7 +81,7 @@ def sample_from_ngsolve_mesh(mesh, source0, coeff0,  r = 0.2):
 #if __name__ == "__main__":
 
 dataset_path = 'data/train_data2.h5'
-checkpoint_path = 'data/checkpoint.pt'
+checkpoint_path = 'data/checkpoint1.pt'
 unit_rect_sampling = 0.1
 r = 0.05*unit_rect_sampling
 fes_order = 1
