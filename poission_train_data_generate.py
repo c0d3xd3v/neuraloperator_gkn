@@ -10,11 +10,11 @@ from hlp.netgen_utilities import generate_unit_rectangle, generate_unit_rectangl
 from gkn.utilities import ball_connectivity, GaussianNormalizer
 
 # Output-Parameter
-filename = 'data/train_data_2.h5'
+filename = 'data/train_data.h5'
 unit_rect_sampling = 0.1
 r = 0.5 * unit_rect_sampling
 fes_order = 2
-
+ 
 # Erstelle das Mesh
 rectange_mesh = generate_unit_rectangle(maxh=unit_rect_sampling)
 circle_mesh = generate_unit_rectangle_with_hole(maxh=unit_rect_sampling)

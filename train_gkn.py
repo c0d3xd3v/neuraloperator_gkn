@@ -20,9 +20,6 @@ train_mesh_path = "data/train_mesh.vol"
 
 mesh = Mesh(train_mesh_path)
 
-#fes_order = 1
-#fes = H1(mesh, order=fes_order, dirichlet="rectangle", complex=False)
-#gfu = GridFunction(fes)
 
 model, optimizer, scheduler, epoch, learning_rate, scheduler_step, scheduler_gamma = load_check_point(checkpoint_path)
 #myloss = LpLoss(size_average=False)
@@ -48,7 +45,7 @@ for epochn in range(epochs):
         #for k in range(len(gfu.vec)):
         #    gfu.vec.data[k] = out_np[k][0]
         #Draw(gfu, mesh, "gfu_train")
-
+ 
         mse = F.mse_loss(out.view(-1, 1), batch.y.view(-1,1))
         mse.backward()
         optimizer.step()
