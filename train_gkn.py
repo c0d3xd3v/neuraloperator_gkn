@@ -27,9 +27,9 @@ train_data = load_pde_dataset(dataset_path)
 
 
 time_restrict=True
-max_time_in_hours = 2.0
+max_time_in_hours = 5.75
 start = time.time()
-epochs = 5
+epochs = 10
 batch_size = 8
 train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
 
