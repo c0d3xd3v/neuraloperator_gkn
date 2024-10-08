@@ -18,7 +18,7 @@ dataset_path = 'data/train_data.h5'
 checkpoint_path = 'data/checkpoint.pt'
 train_mesh_path = "data/train_mesh.vol"
 
-mesh = Mesh(train_mesh_path)
+#mesh = Mesh(train_mesh_path)
 
 
 model, optimizer, scheduler, epoch, learning_rate, scheduler_step, scheduler_gamma = load_check_point(checkpoint_path)
