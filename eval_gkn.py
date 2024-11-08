@@ -8,15 +8,26 @@ from netgen.occ import *
 from torch_geometric.data import Data
 
 from hlp.nn import load_check_point
-from hlp.netgen_utilities import generate_unit_rectangle
+from hlp.netgen_utilities import generate_unit_rectangle, get_boundary_node_ids
 from gkn.utilities import ball_connectivity, GaussianNormalizer
 
 from netgen.geom2d import SplineGeometry
+
+from gkn.gaussian_batch_normalizer import GaussianBatchNormalizer
+
 
 def sample_from_ngsolve_mesh(mesh, source0, coeff0,  r = 0.2):
 
     vertices = [[p[0], p[1], p[2]] for p in mesh.ngmesh.Points()]
     meshpoints = [mesh(v[0], v[1], v[2]) for v in vertices]
+
+    boundary_nodes = get_boundary_node_ids(mesh)
+    node_boundary_feature = [0]*len(vertices)
+
+    for i in boundary_nodes:
+        node_boundary_feature[i] = 1.0
+    node_boundary_feature = torch.Tensor(np.array(node_boundary_feature).T)
+
     vertices = np.transpose(np.array(vertices))
     edge_index, _ = ball_connectivity(vertices.T, r)
 
@@ -33,19 +44,9 @@ def sample_from_ngsolve_mesh(mesh, source0, coeff0,  r = 0.2):
     Rhs = torch.Tensor([source0(x) for x in meshpoints])
     vertices = torch.Tensor(vertices)
 
-    #gn = GaussianNormalizer(U)
-    #U = gn.encode(U)
-    gn = GaussianNormalizer(A)
-    A = gn.encode(A)
-    gn = GaussianNormalizer(Ax)
-    Ax = gn.encode(Ax)
-    gn = GaussianNormalizer(Ay)
-    Ay = gn.encode(Ay)
-    gn = GaussianNormalizer(Rhs)
-    Rhs = gn.encode(Rhs)
-
     X = torch.cat([
         vertices.T,
+        node_boundary_feature.reshape(-1, 1),
         A.reshape(-1, 1),
         Ax.reshape(-1, 1),
         Ay.reshape(-1, 1),
@@ -68,51 +69,54 @@ def sample_from_ngsolve_mesh(mesh, source0, coeff0,  r = 0.2):
                           v1[0].item(), v1[1].item(), v1[2].item(),
                           a0, a1]
         edge_attr.append(attr)
-
     edge_attr = torch.Tensor(edge_attr)
 
     data_test = Data(edge_index=torch.Tensor(edge_index).type(torch.int64),
                      edge_attr=edge_attr,
                      x=X, coeff=A)
-
     return data_test
 
 
-#if __name__ == "__main__":
-
-dataset_path = 'data/train_data2.h5'
-checkpoint_path = 'data/checkpoint1.pt'
-unit_rect_sampling = 0.1
-r = 0.05*unit_rect_sampling
+checkpoint_path = 'data/checkpoint.pt'
+unit_rect_sampling = 0.0125
+r = 2.0*unit_rect_sampling
 fes_order = 1
-
 
 s = 1.0
 scatterer = MoveTo(-s*0.5, -s*0.5).Rectangle(s, s).Face()
-scatterer.edges.name = 'scat'
+scatterer.edges.name = 'rectangle'
+air = Circle((0.0, 0.0), 0.5*s).Face()
+air.edges.name = 'rectangle'
 geo = OCCGeometry(scatterer, dim=2)
-mesh = Mesh(geo.GenerateMesh(maxh=0.25*unit_rect_sampling))
+mesh = Mesh(geo.GenerateMesh(maxh=unit_rect_sampling))
+
 
 #mesh.ngmesh.Save("data/model1/test_mesh.vol")
 fes = H1(mesh, order=fes_order, dirichlet="rectangle", complex=False)
 
 k = 10
-j = 5
-i = 5
+j = 0
+i = 0
 o0 = k / 10.0 + 0.05
-x0 = math.cos(i / 10. * math.pi * 2)
+x0 = -2*math.cos(i / 10. * math.pi * 2)
 y0 = math.sin(j / 10. * math.pi * 2)
 
-source0 = CF(1.) # CF(exp(-0.5 * (((x - x0) / o0) ** 2 + ((y - y0) / o0) ** 2)))
-coeff0 = CF(1.)
+source0 = CF(1.0) #CF(10.0*exp(-0.5 * (((x - x0) / o0) ** 2 + ((y - y0) / o0) ** 2)))
+coeff0 = CF(1.0)
 data_test = sample_from_ngsolve_mesh(mesh, source0, coeff0, r=r)
 
-print(data_test)
+local_batch = data_test.clone()
 
-model, _, _, _ , _, _, _ = load_check_point(checkpoint_path)
-out = model(data_test)
-print(out.data)
-out_np = out.view(-1, 1).detach().cpu().numpy()
+data_tensor = local_batch.x
+target_tensor = local_batch.y
+print(local_batch)
+
+model, _, _, _ , _, _, _, normalizer, target_normalizer = load_check_point(checkpoint_path)
+
+local_batch.x = normalizer.encode(data_tensor)
+out = model(local_batch)
+out = out.view(-1, 1).detach().cpu()
+out_np = normalizer.decode(out).numpy()
 
 gfu = GridFunction(fes)
 gfsource = GridFunction(fes)
