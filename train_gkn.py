@@ -5,7 +5,7 @@ from ngsolve import *
 import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
 
-from hlp.hdf5 import load_pde_dataset
+from hlp.hdf5 import load_pde_dataset, read_pde_dataset_from_hdf5,read_pde_dataset_from_hdf5_torch
 from gkn.KernelNN import KernelNN
 from gkn.utilities import LpLoss
 from hlp.nn import save_check_point
@@ -20,12 +20,13 @@ checkpoint_path = 'data/checkpoint.pt'
 
 model, optimizer, scheduler, epoch, learning_rate, scheduler_step, scheduler_gamma, normalizer, target_normalizer = load_check_point(checkpoint_path)
 #myloss = LpLoss(size_average=False)
-train_data = load_pde_dataset(dataset_path)
+#train_data = load_pde_dataset(dataset_path)
+train_data, _, _ = read_pde_dataset_from_hdf5_torch(dataset_path)
 
 time_restrict=True
 max_time_in_hours = 5.75
 start = time.time()
-epochs = 50
+epochs = 100
 batch_size = 16
 train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
 
@@ -33,6 +34,7 @@ model.train()
 
 for epochn in range(epochs):
     train_mse = 0.0
+
     for batch in train_loader:
 
         local_batch = batch.clone()

@@ -16,20 +16,15 @@ r = 1.05 * unit_rect_sampling
 fes_order = 2
  
 # Erstelle das Mesh
-rectange_mesh = generate_unit_rectangle(maxh=unit_rect_sampling)
+rectangle_mesh = generate_unit_rectangle(maxh=unit_rect_sampling)
 circle_mesh = generate_unit_rectangle_with_hole(maxh=unit_rect_sampling)
 c_mesh = generate_unit_circle(maxh=unit_rect_sampling)
-#rectange_mesh.ngmesh.Save("data/rectange_mesh.vol")
 
-meshes = [rectange_mesh]
-train_data = []
-
-# Sammle alle Werte für die Normalisierung
-all_U, all_A, all_Ax, all_Ay, all_Rhs = [], [], [], [], []
+meshes = [rectangle_mesh]
 
 for mesh in meshes:
-    # Statistische Trainingsdaten, Mesh-Sampling
     vertices = [[p[0], p[1], p[2]] for p in mesh.ngmesh.Points()]
+    triangles = [(t[0][0:3] - 1).tolist() for t in np.array(mesh.ngmesh.Elements2D())]
 
     boundary_nodes = get_boundary_node_ids(mesh)
     node_boundary_feature = [0]*len(vertices)
@@ -40,19 +35,25 @@ for mesh in meshes:
 
     meshpoints = [mesh(v[0], v[1], v[2]) for v in vertices]
     vertices = np.transpose(np.array(vertices))
+    triangles = np.transpose(np.array(triangles))
+    
+    print(f'vertices       : {vertices.shape}')
+    print(f'triangles      : {triangles.shape}')
+    print(f'boundary nodes : {node_boundary_feature.shape}')
+    
     edge_index, _ = ball_connectivity(vertices.T, r)
     
-    print(edge_index.shape)
-    print(vertices.shape)
-    print(node_boundary_feature.shape)
-        
-    # Erstelle den Finite Element Space
     fes = H1(mesh, order=fes_order, dirichlet="rectangle", complex=False)
     gfu = GridFunction(fes)
+
+    train_data = []
 
     for i in range(1, 10):
         for j in range(1, 10):
             for k in range(5, 10):
+                
+                #print(f'k : {k}, j : {j}, i : {i}')
+
                 # Parameter bestimmen
                 o0 = (k / 10.)
                 x0 = math.cos((i / 10.) * math.pi * 2)
@@ -60,10 +61,8 @@ for mesh in meshes:
 
                 source0 = CF(ngsolve.exp(-0.5 * (((x - x0) / o0) ** 2 + ((y - y0) / (o0)) ** 2)))
                 coeff0 = CF(1.)
-                #print(f'k : {k}, j : {j}, i : {i}')
-                gfu = solvePoission(fes, gfu, g=source0, c=coeff0)
 
-                Draw(gfu)
+                gfu = solvePoission(fes, gfu, g=source0, c=coeff0)
 
                 coeffg = GridFunction(fes)
                 coeffg.Set(coeff0)
@@ -112,5 +111,5 @@ for mesh in meshes:
                                 y=U, 
                                 coeff=A)            
                 train_data.append(data_test)
-
-write_pde_dataset_to_hdf5(filename, train_data)
+    
+    write_pde_dataset_to_hdf5(filename, train_data, vertices, triangles)
