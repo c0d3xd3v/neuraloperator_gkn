@@ -4,6 +4,6 @@
 ngs.ini
 *.pt
 *.h5
-**data**
+#**data**
 *.ini
 
